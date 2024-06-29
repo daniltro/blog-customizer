@@ -5,7 +5,7 @@ import { Select } from '../select/Select';
 import { RadioGroup } from 'components/radio-group/RadioGroup';
 import { Text } from '../text/Text';
 import { useClose } from '../../hooks/useClose';
-import { useRef, useEffect, FormEvent } from 'react';
+import { useRef, useEffect, FormEvent, useState } from 'react';
 import {
 	defaultArticleState,
 	fontFamilyOptions,
@@ -18,36 +18,57 @@ import {
 import { Separator } from '../separator';
 
 interface ArticleParamsFormProps {
-	formState: typeof defaultArticleState;
-	changeFontFamily: (selected: OptionType) => void;
-	changeFontColor: (selected: OptionType) => void;
-	changeBackgroundColor: (selected: OptionType) => void;
-	changeContentWidth: (selected: OptionType) => void;
-	changeFontSize: (selected: OptionType) => void;
-	applyState: (event: FormEvent) => void;
+	articleSettings: typeof defaultArticleState;
+	applyState: (formState: typeof defaultArticleState) => void;
 	resetState: () => void;
 	formOpen: boolean;
 	toggleFormOpen: () => void;
 }
 
 export const ArticleParamsForm = ({
-	formState,
-	changeFontFamily,
-	changeFontColor,
-	changeBackgroundColor,
-	changeContentWidth,
-	changeFontSize,
+	articleSettings,
 	applyState,
 	resetState,
 	formOpen,
 	toggleFormOpen,
 }: ArticleParamsFormProps) => {
+	const [formState, setFormState] = useState(articleSettings);
+
+	const changeFontFamily = (selected: OptionType) => {
+		setFormState({ ...formState, fontFamilyOption: selected });
+	};
+
+	const changeFontColor = (selected: OptionType) => {
+		setFormState({ ...formState, fontColor: selected });
+	};
+
+	const changeBackgroundColor = (selected: OptionType) => {
+		setFormState({ ...formState, backgroundColor: selected });
+	};
+
+	const changeContentWidth = (selected: OptionType) => {
+		setFormState({ ...formState, contentWidth: selected });
+	};
+
+	const changeFontSize = (selected: OptionType) => {
+		setFormState({ ...formState, fontSizeOption: selected });
+	};
+
+	const handleApplyState = (event: FormEvent) => {
+		event.preventDefault();
+		applyState({
+			fontFamilyOption: formState.fontFamilyOption,
+			fontColor: formState.fontColor,
+			backgroundColor: formState.backgroundColor,
+			contentWidth: formState.contentWidth,
+			fontSizeOption: formState.fontSizeOption,
+		});
+	};
 	const formRef = useRef<HTMLDivElement>(null);
-	// хук для закытия формы ко клику в оверлей
 	useClose({
 		isOpen: formOpen,
-		onClose: toggleFormOpen, // Функция, которая закрывает форму
-		rootRef: formRef, // Ref, указывающий на корневой элемент формы
+		onClose: toggleFormOpen,
+		rootRef: formRef,
 	});
 	useEffect(() => {
 		const handleEscape = (event: KeyboardEvent) => {
@@ -75,7 +96,7 @@ export const ArticleParamsForm = ({
 				className={`${styles.container} ${
 					formOpen ? styles.container_open : ''
 				}`}>
-				<form className={styles.form} onSubmit={applyState}>
+				<form className={styles.form} onSubmit={handleApplyState}>
 					<Text as={'h2'} size={31} weight={800} uppercase>
 						{'Задайте параметры'}
 					</Text>
